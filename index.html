@@ -2,10 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- PWA / Home Screen Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Frogify">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐸</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%234CAF50%22/><text x=%2250%22 y=%2250%22 font-size=%2270%22 text-anchor=%22middle%22 dy=%22.35em%22>🐸</text></svg>">
+    
+    <!-- Social Preview Tags (Open Graph) -->
     <title>Frogify - Turn Yourself Into a Frog!</title>
+    <meta name="title" content="Frogify - Turn Yourself Into a Frog!">
+    <meta name="description" content="A fun AI web app that turns anyone into a realistic humanoid frog. Open the camera, snap a pic, and get frogified!">
+    
+    <!-- Open Graph / Facebook / iMessage -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://frogify.netlify.app/">
+    <meta property="og:title" content="Frogify 🐸">
+    <meta property="og:description" content="Snap a pic and let AI turn you into a realistic humanoid frog!">
+    <!-- Using a giant emoji data URI for the preview image as a fallback since we don't have a static image file -->
+    <meta property="og:image" content="https://placehold.co/1200x630/4CAF50/FFF?text=Frogify+%F0%9F%90%B8&font=Montserrat">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://frogify.netlify.app/">
+    <meta property="twitter:title" content="Frogify 🐸">
+    <meta property="twitter:description" content="Snap a pic and let AI turn you into a realistic humanoid frog!">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/4CAF50/FFF?text=Frogify+%F0%9F%90%B8&font=Montserrat">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
