@@ -3,6 +3,8 @@ let videoStream = null;
 let video = null;
 let canvas = null;
 let ctx = null;
+let currentFacingMode = 'user';
+let currentBlob = null;
 
 // View elements
 const cameraView = document.getElementById('camera-view');
@@ -13,7 +15,9 @@ const videoElement = document.getElementById('video');
 const canvasElement = document.getElementById('canvas');
 const resultImage = document.getElementById('result-image');
 const captureBtn = document.getElementById('capture-btn');
+const flipBtn = document.getElementById('flip-btn');
 const retryBtn = document.getElementById('retry-btn');
+const saveBtn = document.getElementById('save-btn');
 const errorRetryBtn = document.getElementById('error-retry-btn');
 const errorMessage = document.getElementById('error-message');
 
@@ -25,7 +29,9 @@ function init() {
     
     // Event listeners
     captureBtn.addEventListener('click', capturePhoto);
+    if (flipBtn) flipBtn.addEventListener('click', flipCamera);
     retryBtn.addEventListener('click', resetToCamera);
+    if (saveBtn) saveBtn.addEventListener('click', saveOrShareImage);
     errorRetryBtn.addEventListener('click', resetToCamera);
     
     // Start camera
@@ -37,7 +43,7 @@ async function startCamera() {
     try {
         const constraints = {
             video: {
-                facingMode: 'user',
+                facingMode: currentFacingMode,
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             }
@@ -45,6 +51,10 @@ async function startCamera() {
         
         videoStream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = videoStream;
+        
+        // Mirror video only for front-facing camera
+        video.style.transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+        
         video.play();
     } catch (error) {
         console.error('Error accessing camera:', error);
@@ -60,10 +70,15 @@ function capturePhoto() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Draw video frame to canvas (mirror it back)
+    // Draw video frame to canvas
     ctx.save();
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    if (currentFacingMode === 'user') {
+        // Mirror front-facing camera back to normal
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    } else {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
     ctx.restore();
     
     // Convert to blob and send to API
@@ -84,8 +99,9 @@ function capturePhoto() {
         
         // Send to API
         try {
-            const transformedImage = await transformImage(blob);
-            showResult(transformedImage);
+            const transformedBlob = await transformImage(blob);
+            currentBlob = transformedBlob;
+            showResult(URL.createObjectURL(transformedBlob));
         } catch (error) {
             console.error('Error transforming image:', error);
             
@@ -134,8 +150,7 @@ async function transformImage(imageBlob) {
         throw new Error(errorText || 'API request failed');
     }
     
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
+    return await response.blob();
 }
 
 // Show result image
@@ -158,9 +173,56 @@ function resetToCamera() {
     if (resultImage.src && resultImage.src.startsWith('blob:')) {
         URL.revokeObjectURL(resultImage.src);
     }
+    currentBlob = null;
     
     showView('camera');
     startCamera();
+}
+
+function flipCamera() {
+    currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+    }
+    startCamera();
+}
+
+async function saveOrShareImage() {
+    if (!currentBlob) return;
+    
+    const file = new File([currentBlob], 'frogify-me.png', { type: currentBlob.type || 'image/png' });
+    
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                title: 'My Frogify Transformation',
+                text: 'I turned myself into a frog! 🐸',
+                files: [file]
+            });
+        } catch (error) {
+            // Ignore AbortError (user cancelled share)
+            if (error.name !== 'AbortError') {
+                console.error('Error sharing:', error);
+                downloadImage(); // Fallback to download
+            }
+        }
+    } else {
+        // Fallback for browsers that don't support file sharing
+        downloadImage();
+    }
+}
+
+function downloadImage() {
+    if (!currentBlob) return;
+    const url = URL.createObjectURL(currentBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'frogify-me.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Don't revoke immediately, as it might break the download in some browsers
+    setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 // Switch between views
