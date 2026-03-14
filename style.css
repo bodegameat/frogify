@@ -163,7 +163,7 @@ body {
     .capture-button {
         width: 70px;
         height: 70px;
-        bottom: 30px;
+        bottom: 60px; /* Increased from 30px to make it higher */
     }
     
     .button-icon {
@@ -171,7 +171,7 @@ body {
     }
     
     .retry-button {
-        bottom: 30px;
+        bottom: 60px; /* Also increased to match */
         padding: 14px 28px;
         font-size: 16px;
     }
