@@ -85,7 +85,7 @@ export const handler = async (event, context) => {
         const model = 'gemini-3.1-flash-image-preview';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-        const prompt = "Person-frog hybrid: Recreate this scene exactly, but transform the person into a realistic humanoid frog. Keep the pose, the hoodie, and the background identical.";
+        const prompt = "Person-frog hybrid: Recreate this scene exactly, but transform the person into a realistic humanoid frog. Keep the pose, clothes, and the background identical.";
 
         const requestBody = {
             contents: [{
