@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Frogify - Turn Yourself Into a Frog!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="camera-view" class="view active">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <button id="capture-btn" class="capture-button">
+                <span class="button-icon">🐸</span>
+            </button>
+        </div>
+        
+        <div id="loading-view" class="view">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Transforming into a frog...</p>
+            </div>
+        </div>
+        
+        <div id="result-view" class="view">
+            <img id="result-image" alt="Frog transformation result">
+            <button id="retry-btn" class="retry-button">Take Another Photo</button>
+        </div>
+        
+        <div id="error-view" class="view">
+            <div class="error-content">
+                <p id="error-message">Something went wrong</p>
+                <button id="error-retry-btn" class="retry-button">Try Again</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

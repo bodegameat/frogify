@@ -1,0 +1,189 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.view {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.view.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Camera View */
+#camera-view {
+    background: #000;
+}
+
+#video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+#canvas {
+    display: none;
+}
+
+.capture-button {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #fff;
+    border: 6px solid #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.capture-button:active {
+    transform: translateX(-50%) scale(0.9);
+}
+
+.button-icon {
+    font-size: 36px;
+}
+
+/* Loading View */
+#loading-view {
+    background: #1a1a1a;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-content p {
+    font-size: 18px;
+    color: #fff;
+}
+
+/* Result View */
+#result-view {
+    background: #000;
+}
+
+#result-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.retry-button {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 16px 32px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s;
+}
+
+.retry-button:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+/* Error View */
+#error-view {
+    background: #1a1a1a;
+}
+
+.error-content {
+    text-align: center;
+    padding: 20px;
+}
+
+.error-content p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    color: #ff6b6b;
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+    .capture-button {
+        width: 70px;
+        height: 70px;
+        bottom: 30px;
+    }
+    
+    .button-icon {
+        font-size: 32px;
+    }
+    
+    .retry-button {
+        bottom: 30px;
+        padding: 14px 28px;
+        font-size: 16px;
+    }
+}
+
+/* Landscape orientation */
+@media (orientation: landscape) {
+    .capture-button {
+        bottom: 20px;
+    }
+    
+    .retry-button {
+        bottom: 20px;
+    }
+}

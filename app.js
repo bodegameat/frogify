@@ -1,0 +1,196 @@
+// Camera and app state
+let videoStream = null;
+let video = null;
+let canvas = null;
+let ctx = null;
+
+// View elements
+const cameraView = document.getElementById('camera-view');
+const loadingView = document.getElementById('loading-view');
+const resultView = document.getElementById('result-view');
+const errorView = document.getElementById('error-view');
+const videoElement = document.getElementById('video');
+const canvasElement = document.getElementById('canvas');
+const resultImage = document.getElementById('result-image');
+const captureBtn = document.getElementById('capture-btn');
+const retryBtn = document.getElementById('retry-btn');
+const errorRetryBtn = document.getElementById('error-retry-btn');
+const errorMessage = document.getElementById('error-message');
+
+// Initialize
+function init() {
+    video = videoElement;
+    canvas = canvasElement;
+    ctx = canvas.getContext('2d');
+    
+    // Event listeners
+    captureBtn.addEventListener('click', capturePhoto);
+    retryBtn.addEventListener('click', resetToCamera);
+    errorRetryBtn.addEventListener('click', resetToCamera);
+    
+    // Start camera
+    startCamera();
+}
+
+// Start camera stream
+async function startCamera() {
+    try {
+        const constraints = {
+            video: {
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        };
+        
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = videoStream;
+        video.play();
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        showError('Unable to access camera. Please allow camera permissions.');
+    }
+}
+
+// Capture photo from video stream
+function capturePhoto() {
+    if (!video || !canvas) return;
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas (mirror it back)
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    ctx.restore();
+    
+    // Convert to blob and send to API
+    canvas.toBlob(async (blob) => {
+        if (!blob) {
+            showError('Failed to capture photo');
+            return;
+        }
+        
+        // Stop camera stream
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        
+        // Show loading view
+        showView('loading');
+        
+        // Send to API
+        try {
+            const transformedImage = await transformImage(blob);
+            showResult(transformedImage);
+        } catch (error) {
+            console.error('Error transforming image:', error);
+            
+            // Try to parse error message for better user feedback
+            let errorMsg = 'Failed to transform image. Please try again.';
+            try {
+                const errorJson = JSON.parse(error.message);
+                if (errorJson.error) {
+                    errorMsg = errorJson.error;
+                }
+            } catch (e) {
+                // If error message contains quota info, show a helpful message
+                if (error.message.includes('429') || error.message.includes('quota')) {
+                    errorMsg = 'API quota exceeded. Please check your Gemini API plan settings.';
+                }
+            }
+            
+            showError(errorMsg);
+        }
+    }, 'image/jpeg', 0.9);
+}
+
+// Send image to backend API for transformation
+async function transformImage(imageBlob) {
+    // Convert blob to base64 for easier handling
+    const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(imageBlob);
+    });
+    
+    const response = await fetch('/api/transform', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            image: base64,
+            mimeType: imageBlob.type || 'image/jpeg'
+        })
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'API request failed');
+    }
+    
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+
+// Show result image
+function showResult(imageUrl) {
+    resultImage.src = imageUrl;
+    showView('result');
+}
+
+// Show error message
+function showError(message) {
+    // Truncate very long error messages for better display
+    const displayMessage = message.length > 200 ? message.substring(0, 200) + '...' : message;
+    errorMessage.textContent = displayMessage;
+    showView('error');
+}
+
+// Reset to camera view
+function resetToCamera() {
+    // Clean up result image URL
+    if (resultImage.src && resultImage.src.startsWith('blob:')) {
+        URL.revokeObjectURL(resultImage.src);
+    }
+    
+    showView('camera');
+    startCamera();
+}
+
+// Switch between views
+function showView(viewName) {
+    // Hide all views
+    cameraView.classList.remove('active');
+    loadingView.classList.remove('active');
+    resultView.classList.remove('active');
+    errorView.classList.remove('active');
+    
+    // Show requested view
+    switch(viewName) {
+        case 'camera':
+            cameraView.classList.add('active');
+            break;
+        case 'loading':
+            loadingView.classList.add('active');
+            break;
+        case 'result':
+            resultView.classList.add('active');
+            break;
+        case 'error':
+            errorView.classList.add('active');
+            break;
+    }
+}
+
+// Initialize app when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
