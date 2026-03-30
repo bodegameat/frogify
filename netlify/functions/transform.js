@@ -26,6 +26,27 @@ export const handler = async (event, context) => {
         };
     }
 
+    // Origin check — only allow requests from the real site
+    const origin = event.headers.origin || event.headers.referer || '';
+    const allowedOrigins = ['https://frogify.org', 'https://frogify.netlify.app', 'http://localhost'];
+    if (!allowedOrigins.some(o => origin.startsWith(o))) {
+        console.warn('Blocked request from disallowed origin:', origin);
+        return {
+            statusCode: 403,
+            headers,
+            body: JSON.stringify({ error: 'Forbidden' })
+        };
+    }
+
+    // Payload size limit — reject anything over 15MB
+    if (event.body && event.body.length > 15 * 1024 * 1024) {
+        return {
+            statusCode: 413,
+            headers,
+            body: JSON.stringify({ error: 'Image too large. Please use a smaller photo.' })
+        };
+    }
+
     try {
         // Get API key from environment variable
         const apiKey = process.env.GEMINI_API_KEY;

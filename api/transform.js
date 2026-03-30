@@ -5,6 +5,20 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Origin check — only allow requests from the real site
+    const origin = req.headers.origin || req.headers.referer || '';
+    const allowedOrigins = ['https://frogify.org', 'https://frogify.netlify.app', 'http://localhost'];
+    if (!allowedOrigins.some(o => origin.startsWith(o))) {
+        console.warn('Blocked request from disallowed origin:', origin);
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Payload size limit — reject anything over 15MB
+    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    if (rawBody && rawBody.length > 15 * 1024 * 1024) {
+        return res.status(413).json({ error: 'Image too large. Please use a smaller photo.' });
+    }
+
     try {
         // Get API key from environment variable
         const apiKey = process.env.GEMINI_API_KEY;
