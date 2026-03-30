@@ -100,8 +100,9 @@ function capturePhoto() {
         // Send to API
         try {
             const transformedBlob = await transformImage(blob);
-            currentBlob = transformedBlob;
-            showResult(URL.createObjectURL(transformedBlob));
+            const watermarkedBlob = await addWatermark(transformedBlob);
+            currentBlob = watermarkedBlob;
+            showResult(URL.createObjectURL(watermarkedBlob));
         } catch (error) {
             console.error('Error transforming image:', error);
             
@@ -122,6 +123,49 @@ function capturePhoto() {
             showError(errorMsg);
         }
     }, 'image/jpeg', 0.9);
+}
+
+// Add frogify.org watermark to a blob image
+async function addWatermark(blob) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const url = URL.createObjectURL(blob);
+        img.onload = () => {
+            const wCanvas = document.createElement('canvas');
+            wCanvas.width = img.naturalWidth;
+            wCanvas.height = img.naturalHeight;
+            const wCtx = wCanvas.getContext('2d');
+
+            // Draw the transformed image
+            wCtx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+
+            // Watermark style — subtle credit in bottom-right
+            const fontSize = Math.max(20, Math.round(img.naturalWidth * 0.032));
+            wCtx.font = `600 ${fontSize}px -apple-system, sans-serif`;
+            wCtx.textAlign = 'right';
+            wCtx.textBaseline = 'bottom';
+
+            const padding = Math.round(fontSize * 0.7);
+            const x = img.naturalWidth - padding;
+            const y = img.naturalHeight - padding;
+
+            // Soft shadow for legibility on any background
+            wCtx.shadowColor = 'rgba(0,0,0,0.55)';
+            wCtx.shadowBlur = 6;
+            wCtx.shadowOffsetX = 1;
+            wCtx.shadowOffsetY = 1;
+
+            wCtx.fillStyle = 'rgba(255,255,255,0.65)';
+            wCtx.fillText('frogify.org', x, y);
+
+            wCanvas.toBlob((watermarkedBlob) => {
+                resolve(watermarkedBlob || blob);
+            }, blob.type || 'image/jpeg', 0.92);
+        };
+        img.onerror = () => resolve(blob); // Fallback: return original if anything fails
+        img.src = url;
+    });
 }
 
 // Send image to backend API for transformation
