@@ -82,7 +82,7 @@ export const handler = async (event, context) => {
         base64Image = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
 
         // Prepare the request to Gemini API
-        const model = 'gemini-3.1-flash-image-preview';
+        const model = 'gemini-2.5-flash-image';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         const prompt = "Person-frog hybrid: Recreate this scene exactly, but transform the person into a realistic humanoid frog. Keep the pose, clothes, and the background identical.";

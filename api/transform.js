@@ -65,7 +65,7 @@ export default async function handler(req, res) {
 
         // Prepare the request to Gemini API
         // Using gemini-2.5-flash-image model (Nano Banana)
-        const model = 'gemini-3.1-flash-image-preview';
+        const model = 'gemini-2.5-flash-image';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         const prompt = "Person-frog hybrid: Recreate this scene exactly, but transform the person into a realistic humanoid frog. Keep the pose, clothes, and the background identical.";
