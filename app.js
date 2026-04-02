@@ -20,6 +20,9 @@ const retryBtn = document.getElementById('retry-btn');
 const saveBtn = document.getElementById('save-btn');
 const errorRetryBtn = document.getElementById('error-retry-btn');
 const errorMessage = document.getElementById('error-message');
+const aboutBtn = document.getElementById('about-btn');
+const aboutModal = document.getElementById('about-modal');
+const modalCloseBtn = document.getElementById('modal-close-btn');
 
 // Initialize
 function init() {
@@ -33,6 +36,11 @@ function init() {
     retryBtn.addEventListener('click', resetToCamera);
     if (saveBtn) saveBtn.addEventListener('click', saveOrShareImage);
     errorRetryBtn.addEventListener('click', resetToCamera);
+    if (aboutBtn) aboutBtn.addEventListener('click', openAboutModal);
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeAboutModal);
+    if (aboutModal) aboutModal.addEventListener('click', (e) => {
+        if (e.target === aboutModal) closeAboutModal();
+    });
     
     // Start camera
     startCamera();
@@ -221,6 +229,20 @@ function resetToCamera() {
     
     showView('camera');
     startCamera();
+}
+
+function openAboutModal() {
+    if (aboutModal) {
+        aboutModal.classList.add('open');
+        aboutModal.setAttribute('aria-hidden', 'false');
+    }
+}
+
+function closeAboutModal() {
+    if (aboutModal) {
+        aboutModal.classList.remove('open');
+        aboutModal.setAttribute('aria-hidden', 'true');
+    }
 }
 
 function flipCamera() {

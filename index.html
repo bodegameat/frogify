@@ -40,6 +40,7 @@
         <div id="camera-view" class="view active">
             <video id="video" autoplay playsinline></video>
             <canvas id="canvas" style="display: none;"></canvas>
+            <button id="about-btn" class="about-button" aria-label="About">ⓘ</button>
             <div class="camera-controls">
                 <button id="flip-btn" class="control-button" aria-label="Flip Camera">
                     <svg class="button-icon-svg" viewBox="0 0 24 24" width="28" height="28" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -83,6 +84,22 @@
         </div>
     </div>
     
+    <!-- About Modal -->
+    <div id="about-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-card">
+            <button id="modal-close-btn" class="modal-close" aria-label="Close">✕</button>
+            <div class="modal-body">
+                <p class="modal-title">🐸 Frogify</p>
+                <p class="modal-tagline">Turn yourself into a frog with AI.</p>
+                <p class="modal-desc">No funding. No path to revenue. Just frogs.</p>
+                <p class="modal-privacy">Photos are processed by Google Gemini. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a> applies.</p>
+                <div class="modal-divider"></div>
+                <p class="modal-frog-cta">🌿 If you think frogs are cool, consider donating to protect their home.</p>
+                <a href="https://www.rainforesttrust.org" target="_blank" rel="noopener" class="modal-donate-btn">Rainforest Trust ↗</a>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

@@ -263,6 +263,146 @@ body {
     }
 }
 
+/* About button */
+.about-button {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 17px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+}
+
+.about-button:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Modal overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal-card {
+    background: #1c1c1e;
+    border-radius: 24px 24px 16px 16px;
+    width: 100%;
+    max-width: 480px;
+    padding: 28px 24px 32px;
+    position: relative;
+    animation: slide-up 0.28s cubic-bezier(0.34, 1.1, 0.64, 1);
+}
+
+@keyframes slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.modal-tagline {
+    font-size: 15px;
+    color: rgba(255,255,255,0.75);
+}
+
+.modal-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.45);
+    font-style: italic;
+}
+
+.modal-privacy {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 2px;
+}
+
+.modal-privacy a {
+    color: rgba(255,255,255,0.45);
+    text-decoration: underline;
+}
+
+.modal-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 10px 0;
+}
+
+.modal-frog-cta {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+}
+
+.modal-donate-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 11px 20px;
+    background: #4CAF50;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+}
+
+.modal-donate-btn:active {
+    opacity: 0.8;
+}
+
 /* Landscape orientation */
 @media (orientation: landscape) {
     .camera-controls, .result-controls {
