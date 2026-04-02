@@ -24,6 +24,41 @@ const aboutBtn = document.getElementById('about-btn');
 const aboutModal = document.getElementById('about-modal');
 const modalCloseBtn = document.getElementById('modal-close-btn');
 
+// Funny loading messages
+const loadingMessages = [
+    'Transforming into a frog...',
+    'Calculating lily pad size...',
+    'Applying frog genetics...',
+    'Consulting the pond...',
+    'Ribbit ribbit ribbit...',
+    'Growing webbed feet...',
+    'Switching to fly diet...',
+    'Locating nearest swamp...',
+    'Adjusting eye placement...',
+    'Downloading frog software...',
+];
+let loadingMessageInterval = null;
+
+function startLoadingMessages() {
+    const textEl = document.querySelector('.pulsing-text');
+    if (!textEl) return;
+    let i = 0;
+    textEl.textContent = loadingMessages[0];
+    loadingMessageInterval = setInterval(() => {
+        i = (i + 1) % loadingMessages.length;
+        textEl.textContent = loadingMessages[i];
+    }, 2000);
+}
+
+function stopLoadingMessages() {
+    if (loadingMessageInterval) {
+        clearInterval(loadingMessageInterval);
+        loadingMessageInterval = null;
+    }
+    const textEl = document.querySelector('.pulsing-text');
+    if (textEl) textEl.textContent = 'Transforming into a frog...';
+}
+
 // Initialize
 function init() {
     video = videoElement;
@@ -104,12 +139,14 @@ function capturePhoto() {
         
         // Show loading view
         showView('loading');
+        startLoadingMessages();
         
         // Send to API
         try {
             const transformedBlob = await transformImage(blob);
             const watermarkedBlob = await addWatermark(transformedBlob);
             currentBlob = watermarkedBlob;
+            stopLoadingMessages();
             showResult(URL.createObjectURL(watermarkedBlob));
         } catch (error) {
             console.error('Error transforming image:', error);
@@ -128,6 +165,7 @@ function capturePhoto() {
                 }
             }
             
+            stopLoadingMessages();
             showError(errorMsg);
         }
     }, 'image/jpeg', 0.9);
@@ -262,7 +300,7 @@ async function saveOrShareImage() {
         try {
             await navigator.share({
                 title: 'My Frogify Transformation',
-                text: 'I turned myself into a frog! 🐸',
+                text: 'I turned myself into a frog using frogify.org! 🐸',
                 files: [file]
             });
         } catch (error) {
