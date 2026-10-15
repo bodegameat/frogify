@@ -5,7 +5,7 @@ Transform yourself into a frog using Gemini AI! A simple mobile web app that cap
 ## Features
 
 - 📸 Mobile camera access
-- 🤖 AI-powered image transformation using Gemini 2.5 Flash Image
+- 🤖 AI-powered image transformation using Nano Banana Pro
 - 📱 Fully responsive mobile design
 - ⚡ Fast and simple interface
 
@@ -55,7 +55,17 @@ The app is configured for Vercel serverless functions in `vercel.json`.
 
 - **Frontend:** Vanilla HTML/CSS/JavaScript
 - **Backend:** Node.js/Express (local) or Vercel serverless functions
-- **AI:** Google Gemini 2.5 Flash Image API
+- **AI:** Nano Banana Pro (`gemini-3-pro-image`) by default
+
+## Switching the image model
+
+The model is set in `image-model.js`:
+
+```js
+export const IMAGE_MODEL = 'pro';
+```
+
+Change `'pro'` to `'lite'` for Nano Banana 2 Lite (`gemini-3.1-flash-lite-image`), the faster and cheaper option. Setting `GEMINI_IMAGE_MODEL` to `pro` or `lite` in the host environment overrides the file.
 
 ## Notes
 

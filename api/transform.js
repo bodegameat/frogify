@@ -1,4 +1,6 @@
 // Serverless function for Gemini API image transformation
+import { buildImageRequest, extractGeneratedImage } from '../image-model.js';
+
 export default async function handler(req, res) {
     // Only allow POST requests
     if (req.method !== 'POST') {
@@ -77,28 +79,10 @@ export default async function handler(req, res) {
             }
         }
 
-        // Prepare the request to Gemini API
-        // Using gemini-2.5-flash-image model (Nano Banana)
-        const model = 'gemini-2.5-flash-image';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
+        // Model choice lives in image-model.js (pro or lite).
         const prompt = "Person-frog hybrid: Recreate this scene exactly, but transform the person into a realistic humanoid frog. Keep the pose, clothes, and the background identical.";
-
-        const requestBody = {
-            contents: [{
-                parts: [
-                    {
-                        text: prompt
-                    },
-                    {
-                        inline_data: {
-                            mime_type: mimeType,
-                            data: base64Image
-                        }
-                    }
-                ]
-            }]
-        };
+        const { model, body: requestBody } = buildImageRequest({ prompt, mimeType, base64Image });
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model.id}:generateContent?key=${apiKey}`;
 
         // Call Gemini API
         const response = await fetch(url, {
@@ -140,38 +124,11 @@ export default async function handler(req, res) {
         }
 
         const data = await response.json();
+        const generated = extractGeneratedImage(data);
 
-        // Extract the generated image from response
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || 
-            !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-            console.error('Unexpected API response format:', JSON.stringify(data));
-            return res.status(500).json({ error: 'Unexpected response from API' });
-        }
-
-        // The API response may have multiple parts - find the one with the image
-        // Parts can be in any order, and may include text before the image
-        let imagePart = null;
-        let imageData = null;
-        let imageMimeType = 'image/png';
-        
-        for (const part of data.candidates[0].content.parts) {
-            // Check for both camelCase (inlineData) and snake_case (inline_data)
-            const inlineData = part.inlineData || part.inline_data;
-            if (inlineData && inlineData.data) {
-                imagePart = part;
-                imageData = inlineData.data;
-                imageMimeType = inlineData.mimeType || inlineData.mime_type || 'image/png';
-                break;
-            }
-        }
-        
-        // Check if we found an image
-        if (imageData) {
-            // Convert base64 back to buffer
-            const imageBuffer = Buffer.from(imageData, 'base64');
-            
-            // Return image as response
-            res.setHeader('Content-Type', imageMimeType);
+        if (generated) {
+            const imageBuffer = Buffer.from(generated.data, 'base64');
+            res.setHeader('Content-Type', generated.mimeType);
             res.setHeader('Content-Length', imageBuffer.length);
             return res.status(200).send(imageBuffer);
         } else {
