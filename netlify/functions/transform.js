@@ -1,4 +1,6 @@
 // Netlify serverless function for Gemini API image transformation
+import { buildImageRequest, extractGeneratedImage } from '../../image-model.js';
+
 export const handler = async (event, context) => {
     // CORS headers
     const headers = {
@@ -102,33 +104,15 @@ export const handler = async (event, context) => {
         // Remove data URL prefix if present
         base64Image = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
 
-        // Prepare the request to Gemini API
-        const model = 'gemini-2.5-flash-image';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
+        // Model choice lives in image-model.js (pro or lite).
         const prompt = "Person-frog hybrid: Recreate this scene exactly, but transform the person into a realistic humanoid frog. Keep the pose, clothes, and the background identical.";
-
-        const requestBody = {
-            contents: [{
-                parts: [
-                    { text: prompt },
-                    {
-                        inline_data: {
-                            mime_type: mimeType,
-                            data: base64Image
-                        }
-                    }
-                ]
-            }],
-            // REQUIRED: If you don't include this, Gemini only returns text
-            generationConfig: {
-                responseModalities: ["TEXT", "IMAGE"]
-            }
-        };
+        const { model, body: requestBody } = buildImageRequest({ prompt, mimeType, base64Image });
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model.id}:generateContent?key=${apiKey}`;
 
         // Call Gemini API
         console.log('Calling Gemini API:', {
-            model: model,
+            model: model.id,
+            imageSize: model.imageSize,
             url: url.replace(apiKey, '[REDACTED]'),
             requestBodySize: JSON.stringify(requestBody).length
         });
@@ -182,42 +166,16 @@ export const handler = async (event, context) => {
         }
 
         const data = await response.json();
+        const generated = extractGeneratedImage(data);
 
-        // Extract the generated image from response
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || 
-            !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-            console.error('Unexpected API response format:', JSON.stringify(data));
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ error: 'Unexpected response from API' })
-            };
-        }
-
-        // The API response may have multiple parts - find the one with the image
-        let imageData = null;
-        let imageMimeType = 'image/png';
-        
-        for (const part of data.candidates[0].content.parts) {
-            // Check for both camelCase (inlineData) and snake_case (inline_data)
-            const inlineData = part.inlineData || part.inline_data;
-            if (inlineData && inlineData.data) {
-                imageData = inlineData.data;
-                imageMimeType = inlineData.mimeType || inlineData.mime_type || 'image/png';
-                break;
-            }
-        }
-        
-        if (imageData) {
-            // Convert base64 to buffer for Netlify response
-            // Netlify functions can return base64 encoded binary data
+        if (generated) {
             return {
                 statusCode: 200,
                 headers: {
-                    'Content-Type': imageMimeType,
+                    'Content-Type': generated.mimeType,
                     'Access-Control-Allow-Origin': '*'
                 },
-                body: imageData,
+                body: generated.data,
                 isBase64Encoded: true
             };
         } else {
